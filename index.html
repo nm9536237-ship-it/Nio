@@ -1,84 +1,130 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>3D Ninja Jump - @oiono</title>
+    <title>Pro 3D Runner</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #87CEEB; font-family: sans-serif; }
-        #ui { position: absolute; top: 20px; width: 100%; text-align: center; color: white; pointer-events: none; }
-        #score { font-size: 35px; font-weight: bold; text-shadow: 2px 2px 5px #000; }
-        #status { font-size: 18px; margin-top: 5px; background: rgba(0,0,0,0.3); display: inline-block; padding: 5px 15px; border-radius: 20px; }
+        body { margin: 0; overflow: hidden; background: #87CEEB; font-family: 'Arial Black', sans-serif; }
+        #ui { position: absolute; top: 20px; width: 100%; text-align: center; color: white; pointer-events: none; text-shadow: 2px 2px 4px #000; }
+        #score { font-size: 40px; color: #ffcc00; }
+        #status { font-size: 20px; margin-top: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div id="ui">
         <div id="score">SCORE: 0</div>
-        <div id="status">लाल डिब्बों से बचकर कूदो!</div>
+        <div id="status">Tap to Jump! Avoid Red Blocks.</div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        // 1. दुनिया सेट करना (Scene Setup)
         const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // आसमान का रंग
+        scene.fog = new THREE.Fog(0x87CEEB, 10, 50); // माहौल के लिए कोहरा (Fog)
+
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; // असली दिखने के लिए परछाई (Shadows) ऑन की
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // सॉफ्ट परछाई
         document.body.appendChild(renderer.domElement);
 
-        const light = new THREE.DirectionalLight(0xffffff, 1.2);
-        light.position.set(5, 10, 7);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040, 1.2));
+        // 2. रोशनी (Lighting - असली सूरज जैसी)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // धीमी रोशनी
+        scene.add(ambientLight);
 
-        // आपका इंसान (Player)
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1); // सूरज की रोशनी
+        dirLight.position.set(-5, 15, 10); // सूरज की जगह
+        dirLight.castShadow = true; // यह लाइट परछाई बनाएगी
+        dirLight.shadow.camera.top = 10;
+        dirLight.shadow.camera.bottom = -10;
+        dirLight.shadow.camera.left = -15;
+        dirLight.shadow.camera.right = 15;
+        scene.add(dirLight);
+
+        // 3. आपका कैरेक्टर (Player - अभी भी डिब्बे हैं, पर परछाई के साथ)
         const player = new THREE.Group();
         scene.add(player);
-        player.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: 0x0000ff})));
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.45), new THREE.MeshStandardMaterial({color: 0xffcc99}));
-        head.position.y = 0.65; player.add(head);
-        player.position.set(-2, 0.5, 0);
 
-        // दुश्मन (Enemy)
-        const enemy = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: 0xff0000}));
+        // शरीर
+        const bodyGeo = new THREE.BoxGeometry(0.6, 0.9, 0.4);
+        const bodyMat = new THREE.MeshStandardMaterial({color: 0x2a6fd6, roughness: 0.7}); // प्रोफेशनल मेटेरियल
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.castShadow = true; // यह परछाई फेंकेगा
+        player.add(body);
+
+        // सिर
+        const headGeo = new THREE.BoxGeometry(0.45, 0.45, 0.45);
+        const headMat = new THREE.MeshStandardMaterial({color: 0xffdbac, roughness: 0.5});
+        const head = new THREE.Mesh(headGeo, headMat);
+        head.position.y = 0.7;
+        head.castShadow = true; // सिर की भी परछाई
+        player.add(head);
+
+        player.position.set(-3, 0.55, 0);
+
+        // 4. दुश्मन (Enemy Block)
+        const enemyGeo = new THREE.BoxGeometry(1, 1, 1);
+        const enemyMat = new THREE.MeshStandardMaterial({color: 0xd92323, roughness: 0.3, metalness: 0.4}); // थोड़ा चमकदार लाल
+        const enemy = new THREE.Mesh(enemyGeo, enemyMat);
+        enemy.castShadow = true; // दुश्मन की परछाई
         scene.add(enemy);
-        enemy.position.set(12, 0.4, 0);
+        enemy.position.set(20, 0.5, 0);
 
-        // हरी घास वाली जमीन
-        const ground = new THREE.Mesh(new THREE.BoxGeometry(100, 1, 10), new THREE.MeshStandardMaterial({color: 0x228b22}));
-        ground.position.y = -1; scene.add(ground);
+        // 5. जमीन (Ground - असली दिखने वाली)
+        const groundGeo = new THREE.PlaneGeometry(200, 20);
+        const groundMat = new THREE.MeshStandardMaterial({color: 0x4f8f39, roughness: 0.8}); // घास जैसा रंग
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2; // जमीन को लिटाया
+        ground.receiveShadow = true; // जमीन परछाई को ग्रहण करेगी (दिखाएगी)
+        scene.add(ground);
 
-        camera.position.set(0, 3, 7); camera.lookAt(0, 1, 0);
+        // कैमरा सेट करना
+        camera.position.set(0, 4, 8);
+        camera.lookAt(0, 1, 0);
 
-        let velocity = 0, isJumping = false, score = 0, gameRunning = true, speed = 0.12;
+        // गेम लॉजिक (Physics & State)
+        let velocity = 0, isJumping = false, score = 0, gameRunning = true, speed = 0.15;
 
-        const handleAction = () => { if(!isJumping && gameRunning) { velocity = 0.18; isJumping = true; } };
+        const handleAction = () => { if(!isJumping && gameRunning) { velocity = 0.22; isJumping = true; } };
         window.addEventListener('touchstart', handleAction);
         window.addEventListener('mousedown', handleAction);
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space') handleAction(); });
 
         function animate() {
             if(!gameRunning) return;
             requestAnimationFrame(animate);
 
+            // दुश्मन की चाल
             enemy.position.x -= speed;
-            if(enemy.position.x < -6) {
-                enemy.position.x = 12;
+            enemy.rotation.x -= 0.05; // दुश्मन लुढ़कता हुआ आएगा
+            if(enemy.position.x < -8) {
+                enemy.position.x = 20 + Math.random() * 5; // थोड़ी अलग दूरी से आएगा
                 score++;
-                speed += 0.005; // गेम धीरे-धीरे तेज होगा
+                speed += 0.008; // स्पीड बढ़ेगी
                 document.getElementById('score').innerText = "SCORE: " + score;
             }
 
+            // जंप लॉजिक
             if(isJumping) {
-                player.position.y += velocity; velocity -= 0.009;
-                if(player.position.y <= 0.5) { player.position.y = 0.5; isJumping = false; }
+                player.position.y += velocity; velocity -= 0.012; // गुरुत्वाकर्षण (Gravity)
+                if(player.position.y <= 0.55) { player.position.y = 0.55; isJumping = false; }
             }
 
-            // टक्कर की जांच (Collision)
-            if(Math.abs(player.position.x - enemy.position.x) < 0.7 && player.position.y < 1.1) {
+            // टक्कर (Collision)
+            if(Math.abs(player.position.x - enemy.position.x) < 0.9 && player.position.y < 1.5) {
                 gameRunning = false;
-                document.getElementById('status').innerText = "GAME OVER! खेल दोबारा शुरू करने के लिए पेज रिफ्रेश करें";
-                document.getElementById('status').style.background = "red";
+                document.getElementById('status').innerText = "GAME OVER! Refresh to Restart.";
+                document.getElementById('status').style.color = "#ff3333";
             }
             renderer.render(scene, camera);
         }
+        // विंडो का साइज़ बदलने पर गेम सही दिखे
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
         animate();
     </script>
 </body>
-    </html>
-    
+</html>
