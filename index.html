@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My 3D Game</title>
+    <title>3D Ninja Jump - @oiono</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #87CEEB; }
-        #info { position: absolute; top: 10px; width: 100%; text-align: center; color: white; font-family: sans-serif; text-shadow: 2px 2px 4px #000; }
+        body { margin: 0; overflow: hidden; background: #87CEEB; font-family: sans-serif; }
+        #ui { position: absolute; top: 20px; width: 100%; text-align: center; color: white; pointer-events: none; }
+        #score { font-size: 35px; font-weight: bold; text-shadow: 2px 2px 5px #000; }
+        #status { font-size: 18px; margin-top: 5px; background: rgba(0,0,0,0.3); display: inline-block; padding: 5px 15px; border-radius: 20px; }
     </style>
 </head>
 <body>
-    <div id="info">3D GAME: TAP TO JUMP</div>
+    <div id="ui">
+        <div id="score">SCORE: 0</div>
+        <div id="status">लाल डिब्बों से बचकर कूदो!</div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const scene = new THREE.Scene();
@@ -17,63 +22,63 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Lights
         const light = new THREE.DirectionalLight(0xffffff, 1.2);
-        light.position.set(5, 10, 7.5);
+        light.position.set(5, 10, 7);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040, 1.5));
+        scene.add(new THREE.AmbientLight(0x404040, 1.2));
 
-        // Player (Insaan) Group
+        // आपका इंसान (Player)
         const player = new THREE.Group();
         scene.add(player);
-
-        // Body (Shirt)
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: 0x0000ff}));
-        player.add(body);
-
-        // Head (Skin)
+        player.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({color: 0x0000ff})));
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.45), new THREE.MeshStandardMaterial({color: 0xffcc99}));
-        head.position.y = 0.65;
-        player.add(head);
+        head.position.y = 0.65; player.add(head);
+        player.position.set(-2, 0.5, 0);
 
-        // Legs (Pants)
-        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.3), new THREE.MeshStandardMaterial({color: 0x333333}));
-        leg.position.y = -0.6;
-        player.add(leg);
+        // दुश्मन (Enemy)
+        const enemy = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: 0xff0000}));
+        scene.add(enemy);
+        enemy.position.set(12, 0.4, 0);
 
-        player.position.y = 0.5;
+        // हरी घास वाली जमीन
+        const ground = new THREE.Mesh(new THREE.BoxGeometry(100, 1, 10), new THREE.MeshStandardMaterial({color: 0x228b22}));
+        ground.position.y = -1; scene.add(ground);
 
-        // Ground (Grass)
-        const ground = new THREE.Mesh(new THREE.BoxGeometry(20, 1, 20), new THREE.MeshStandardMaterial({color: 0x228b22}));
-        ground.position.y = -1;
-        scene.add(ground);
+        camera.position.set(0, 3, 7); camera.lookAt(0, 1, 0);
 
-        camera.position.z = 6;
-        camera.position.y = 3;
-        camera.lookAt(player.position);
+        let velocity = 0, isJumping = false, score = 0, gameRunning = true, speed = 0.12;
 
-        let velocity = 0;
-        let isJumping = false;
-
-        function jump() {
-            if(!isJumping) { velocity = 0.15; isJumping = true; }
-        }
-
-        window.addEventListener('touchstart', jump);
-        window.addEventListener('mousedown', jump);
+        const handleAction = () => { if(!isJumping && gameRunning) { velocity = 0.18; isJumping = true; } };
+        window.addEventListener('touchstart', handleAction);
+        window.addEventListener('mousedown', handleAction);
 
         function animate() {
+            if(!gameRunning) return;
             requestAnimationFrame(animate);
-            player.rotation.y += 0.01; 
+
+            enemy.position.x -= speed;
+            if(enemy.position.x < -6) {
+                enemy.position.x = 12;
+                score++;
+                speed += 0.005; // गेम धीरे-धीरे तेज होगा
+                document.getElementById('score').innerText = "SCORE: " + score;
+            }
+
             if(isJumping) {
-                player.position.y += velocity;
-                velocity -= 0.008;
+                player.position.y += velocity; velocity -= 0.009;
                 if(player.position.y <= 0.5) { player.position.y = 0.5; isJumping = false; }
+            }
+
+            // टक्कर की जांच (Collision)
+            if(Math.abs(player.position.x - enemy.position.x) < 0.7 && player.position.y < 1.1) {
+                gameRunning = false;
+                document.getElementById('status').innerText = "GAME OVER! खेल दोबारा शुरू करने के लिए पेज रिफ्रेश करें";
+                document.getElementById('status').style.background = "red";
             }
             renderer.render(scene, camera);
         }
         animate();
     </script>
 </body>
-  </html>
-  
+    </html>
+    
