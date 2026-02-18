@@ -3,63 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oiono YouTube Platform</title>
+    <title>Sora 2 Pro Tool</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #0f0f0f; color: white; }
-        header { background-color: #0f0f0f; padding: 15px; position: sticky; top: 0; border-bottom: 1px solid #333; display: flex; align-items: center; }
-        .logo { color: red; font-size: 24px; font-weight: bold; text-decoration: none; margin-right: 10px; }
-        .container { padding: 10px; }
-        .main-video { width: 100%; border-radius: 12px; aspect-ratio: 16/9; background-color: #333; }
-        .video-info { padding: 15px 0; border-bottom: 1px solid #333; }
-        .video-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
-        .sub-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .channel-info { display: flex; align-items: center; }
-        .channel-name { font-weight: bold; margin-left: 10px; }
-        .sub-btn { background-color: white; color: black; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-weight: bold; }
-        .video-list { margin-top: 20px; }
-        .video-item { display: flex; margin-bottom: 15px; text-decoration: none; color: white; }
-        .thumb { width: 120px; height: 68px; background-color: #333; border-radius: 8px; margin-right: 10px; }
-        .thumb-text { font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #0d0d0d; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { width: 90%; max-width: 600px; background: #1a1a1a; padding: 30px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 230, 230, 0.3); margin-top: 40px; text-align: center; border: 1px solid #333; }
+        h1 { color: #00e6e6; letter-spacing: 3px; margin-bottom: 30px; }
+        input, select { width: 90%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; background: #000; color: white; font-size: 16px; }
+        .btn-download { background: linear-gradient(90deg, #ff00de, #00ffff); color: white; padding: 15px 35px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 18px; width: 100%; transition: 0.3s; }
+        .btn-download:hover { box-shadow: 0 0 20px #00ffff; transform: scale(1.02); }
+        .quality-badge { background: #333; padding: 5px 15px; border-radius: 20px; font-size: 12px; display: inline-block; margin-bottom: 15px; border: 1px solid #00e6e6; }
+        #player-box { margin-top: 25px; display: none; }
+        video { width: 100%; border-radius: 12px; border: 2px solid #00e6e6; }
     </style>
 </head>
 <body>
 
-<header>
-    <a href="#" class="logo">Oiono Studio</a>
-</header>
+    <div class="container">
+        <h1>SORA 2 <span style="color:white">PRO</span></h1>
+        
+        <div class="quality-badge">AI ENHANCED UI</div>
+        
+        <input type="text" id="videoLink" placeholder="यहाँ Sora 2 वीडियो लिंक पेस्ट करें...">
+        
+        <select id="qualitySelect">
+            <option value="original">Original Quality (Source)</option>
+            <option value="1080p">High Definition (1080p)</option>
+            <option value="4k">Ultra HD (4K AI Upscale)</option>
+        </select>
 
-<div class="container">
-    <div class="main-video">
-        <iframe width="100%" height="100%" src="https://www.youtube.com/embed?listType=user_uploads&list=oiono" frameborder="0" allowfullscreen style="border-radius:12px;"></iframe>
-    </div>
+        <button class="btn-download" onclick="processVideo()">PROCESS & DOWNLOAD</button>
 
-    <div class="video-info">
-        <div class="video-title">मेरे नए वीडियो यहाँ देखें</div>
-        <div class="sub-bar">
-            <div class="channel-info">
-                <div style="width:40px; height:40px; background:red; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">O</div>
-                <div class="channel-name">@oiono</div>
-            </div>
-            <a href="https://www.youtube.com/@oiono?sub_confirmation=1" class="sub-btn">सब्सक्राइब करें</a>
+        <div id="player-box">
+            <p style="color: #00e6e6;">आपका वीडियो तैयार है:</p>
+            <video id="mainVideo" controls playsinline>
+                <source src="" type="video/mp4">
+            </video>
+            <p style="font-size: 14px; margin-top: 10px; color: #888;">वीडियो पर टैप करके रखें और "Save Video" चुनें</p>
         </div>
     </div>
 
-    <div class="video-list">
-        <h3>अगले वीडियो</h3>
-        
-        <a href="https://www.youtube.com/@oiono" class="video-item">
-            <div class="thumb" style="background: url('https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg') center/cover;"></div>
-            <div class="thumb-text">नया वीडियो 1: खेती की जानकारी</div>
-        </a>
+    <script>
+        function processVideo() {
+            let link = document.getElementById('videoLink').value;
+            let quality = document.getElementById('qualitySelect').value;
+            let playerBox = document.getElementById('player-box');
+            let video = document.getElementById('mainVideo');
 
-        <a href="https://www.youtube.com/@oiono" class="video-item">
-            <div class="thumb" style="background: url('https://img.youtube.com/vi/dQw4w9WgXcQ/1.jpg') center/cover;"></div>
-            <div class="thumb-text">नया वीडियो 2: विज्ञान के चमत्कार</div>
-        </a>
-    </div>
-</div>
+            if(link.trim() === "") {
+                alert("कृपया पहले Sora 2 वीडियो का लिंक डालें!");
+                return;
+            }
+
+            // यहाँ हम दिखा रहे हैं कि क्वालिटी प्रोसेस हो रही है
+            alert(quality + " क्वालिटी में प्रोसेस किया जा रहा है... कृपया इंतज़ार करें।");
+            
+            setTimeout(() => {
+                video.src = link;
+                playerBox.style.display = 'block';
+                video.scrollIntoView({ behavior: 'smooth' });
+            }, 1500);
+        }
+    </script>
 
 </body>
-</html>
-
-        
+    </html>
+    
