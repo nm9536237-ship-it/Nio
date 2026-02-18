@@ -1,106 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-    <title>3D World Adventure - @oiono</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oiono YouTube Platform</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
-        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; box-sizing: border-box; }
-        #score { font-size: 48px; color: #00ffff; font-weight: bold; text-shadow: 0 0 10px #00ffff; }
-        #msg { font-size: 24px; color: white; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 50px; }
-        #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        .btn { padding: 15px 40px; font-size: 24px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,255,0,0.3); }
+        body { margin: 0; font-family: sans-serif; background-color: #0f0f0f; color: white; }
+        header { background-color: #0f0f0f; padding: 15px; position: sticky; top: 0; border-bottom: 1px solid #333; display: flex; align-items: center; }
+        .logo { color: red; font-size: 24px; font-weight: bold; text-decoration: none; margin-right: 10px; }
+        .container { padding: 10px; }
+        .main-video { width: 100%; border-radius: 12px; aspect-ratio: 16/9; background-color: #333; }
+        .video-info { padding: 15px 0; border-bottom: 1px solid #333; }
+        .video-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+        .sub-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .channel-info { display: flex; align-items: center; }
+        .channel-name { font-weight: bold; margin-left: 10px; }
+        .sub-btn { background-color: white; color: black; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-weight: bold; }
+        .video-list { margin-top: 20px; }
+        .video-item { display: flex; margin-bottom: 15px; text-decoration: none; color: white; }
+        .thumb { width: 120px; height: 68px; background-color: #333; border-radius: 8px; margin-right: 10px; }
+        .thumb-text { font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body>
-    <div id="ui"><div id="score">SCORE: 0</div><div id="msg">TAP TO JUMP</div></div>
-    <div id="menu">
-        <h1 style="color: white; font-size: 50px; margin-bottom: 20px;">NIO WORLD 3D</h1>
-        <button class="btn" onclick="startGame()">START GAME</button>
+
+<header>
+    <a href="#" class="logo">Oiono Studio</a>
+</header>
+
+<div class="container">
+    <div class="main-video">
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed?listType=user_uploads&list=oiono" frameborder="0" allowfullscreen style="border-radius:12px;"></iframe>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        let scene, camera, renderer, player, enemy, ground, gameActive = false, score = 0, speed = 0.2;
-        let isJumping = false, velocity = 0;
+    <div class="video-info">
+        <div class="video-title">मेरे नए वीडियो यहाँ देखें</div>
+        <div class="sub-bar">
+            <div class="channel-info">
+                <div style="width:40px; height:40px; background:red; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">O</div>
+                <div class="channel-name">@oiono</div>
+            </div>
+            <a href="https://www.youtube.com/@oiono?sub_confirmation=1" class="sub-btn">सब्सक्राइब करें</a>
+        </div>
+    </div>
 
-        function init() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB); // नीला आसमान
-            scene.fog = new THREE.Fog(0x87CEEB, 10, 50); // कोहरा जो गहराई देता है
+    <div class="video-list">
+        <h3>अगले वीडियो</h3>
+        
+        <a href="https://www.youtube.com/@oiono" class="video-item">
+            <div class="thumb" style="background: url('https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg') center/cover;"></div>
+            <div class="thumb-text">नया वीडियो 1: खेती की जानकारी</div>
+        </a>
 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            camera.position.set(-5, 4, 10); // कैमरे को ऊपर और पीछे किया ताकि सब दिखे
-            camera.lookAt(0, 1, 0);
+        <a href="https://www.youtube.com/@oiono" class="video-item">
+            <div class="thumb" style="background: url('https://img.youtube.com/vi/dQw4w9WgXcQ/1.jpg') center/cover;"></div>
+            <div class="thumb-text">नया वीडियो 2: विज्ञान के चमत्कार</div>
+        </a>
+    </div>
+</div>
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true; // परछाई ऑन की
-            document.body.appendChild(renderer.domElement);
-
-            // रोशनी (Lighting)
-            const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-            sun.position.set(-10, 20, 10);
-            sun.castShadow = true;
-            scene.add(sun);
-            scene.add(new THREE.AmbientLight(0x404040, 1.5));
-
-            // असली जमीन (Grass Ground)
-            ground = new THREE.Mesh(new THREE.PlaneGeometry(1000, 20), new THREE.MeshStandardMaterial({color: 0x27ae60}));
-            ground.rotation.x = -Math.PI / 2;
-            ground.receiveShadow = true;
-            scene.add(ground);
-
-            // 3D कैरेक्टर (Humanoid Robot)
-            player = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1, 0.4), new THREE.MeshStandardMaterial({color: 0x2980b9}));
-            body.castShadow = true;
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xffdbac}));
-            head.position.y = 0.75; head.castShadow = true;
-            player.add(body, head);
-            player.position.set(-3, 0.5, 0);
-            scene.add(player);
-
-            // दुश्मन (Obstacle)
-            enemy = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xc0392b}));
-            enemy.castShadow = true;
-            enemy.position.set(20, 0.5, 0);
-            scene.add(enemy);
-
-            window.addEventListener('mousedown', () => { if(!isJumping && gameActive) { velocity = 0.22; isJumping = true; } });
-        }
-
-        function startGame() {
-            document.getElementById('menu').style.display = 'none';
-            gameActive = true;
-            animate();
-        }
-
-        function animate() {
-            if(!gameActive) return;
-            requestAnimationFrame(animate);
-
-            enemy.position.x -= speed;
-            if(enemy.position.x < -10) {
-                enemy.position.x = 25 + Math.random()*15;
-                score++;
-                speed += 0.005;
-                document.getElementById('score').innerText = "SCORE: " + score;
-            }
-
-            if(isJumping) {
-                player.position.y += velocity;
-                velocity -= 0.01;
-                if(player.position.y <= 0.5) { player.position.y = 0.5; isJumping = false; }
-            }
-
-            if(Math.abs(player.position.x - enemy.position.x) < 0.8 && player.position.y < 1.5) {
-                gameActive = false;
-                document.getElementById('menu').style.display = 'flex';
-                document.querySelector('h1').innerText = "GAME OVER";
-            }
-            renderer.render(scene, camera);
-        }
-        init();
-    </script>
 </body>
 </html>
+
+        
